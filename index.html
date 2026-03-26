@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>miguelito4u Wx</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Exo+2:wght@300;400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--storm:#0a0e1a;--deep:#050810;--electric:#00d4ff;--lightning:#ffe566;--thunder:#7b2fff;--danger:#ff4757;--warn:#ff9f43;--safe:#2ed573;--cloud:#8892a4;--glass:rgba(255,255,255,0.05);--glass-border:rgba(0,212,255,0.2);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Exo 2',sans-serif;background:var(--deep);color:#fff;min-height:100vh;overflow-x:hidden;}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--deep);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+#loader.fade-out{animation:loaderFade .8s ease forwards;}
+@keyframes loaderFade{to{opacity:0;pointer-events:none;}}
+.storm-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,#1a0a3a 0%,var(--deep) 70%);}
+.rain-container{position:absolute;inset:0;overflow:hidden;}
+.raindrop{position:absolute;width:1px;background:linear-gradient(to bottom,transparent,rgba(0,212,255,.6));animation:fall linear infinite;top:-100px;}
+@keyframes fall{to{transform:translateY(110vh);opacity:.2;}}
+.lightning-container{position:absolute;inset:0;pointer-events:none;}
+.bolt{position:absolute;opacity:0;animation:strike ease-out infinite;}
+.bolt svg{filter:drop-shadow(0 0 12px #ffe566) drop-shadow(0 0 30px #fff);}
+@keyframes strike{0%{opacity:0;}2%{opacity:1;}4%{opacity:.3;}6%{opacity:1;}8%{opacity:0;}100%{opacity:0;}}
+.bolt:nth-child(1){left:15%;top:5%;animation-duration:5s;animation-delay:.5s;}
+.bolt:nth-child(2){left:65%;top:0%;animation-duration:7s;animation-delay:2s;}
+.bolt:nth-child(3){left:40%;top:3%;animation-duration:6s;animation-delay:3.5s;}
+.bolt:nth-child(4){left:80%;top:2%;animation-duration:4.5s;animation-delay:1.2s;}
+.bolt:nth-child(5){left:5%;top:0%;animation-duration:8s;animation-delay:4s;}
+.flash{position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;animation:flashAnim 5s ease-out infinite;}
+.flash:nth-child(2){animation-delay:2s;animation-duration:7s;}
+.flash:nth-child(3){animation-delay:3.5s;animation-duration:6s;}
+@keyframes flashAnim{0%,1%,3%,100%{opacity:0;}2%{opacity:.4;}}
+.cloud-wrap{position:absolute;top:0;left:0;right:0;height:200px;overflow:hidden;}
+.lcloud{position:absolute;background:linear-gradient(135deg,#1e2640,#0f1428);border-radius:60px;filter:blur(2px);animation:drift linear infinite;}
+.lcloud::before,.lcloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.lcloud:nth-child(1){width:200px;height:60px;top:20px;left:-220px;opacity:.9;animation-duration:18s;}
+.lcloud:nth-child(1)::before{width:100px;height:80px;top:-40px;left:30px;}
+.lcloud:nth-child(1)::after{width:70px;height:60px;top:-30px;left:90px;}
+.lcloud:nth-child(2){width:280px;height:70px;top:60px;left:-310px;opacity:.7;animation-duration:25s;animation-delay:-8s;}
+.lcloud:nth-child(2)::before{width:130px;height:90px;top:-50px;left:50px;}
+.lcloud:nth-child(3){width:160px;height:50px;top:10px;left:-180px;opacity:.8;animation-duration:20s;animation-delay:-12s;}
+@keyframes drift{to{transform:translateX(120vw);}}
+.loader-content{position:relative;z-index:2;text-align:center;}
+.loader-icon{font-size:80px;margin-bottom:20px;animation:iconPulse 2s ease-in-out infinite;filter:drop-shadow(0 0 20px var(--electric));display:block;}
+@keyframes iconPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.1);filter:drop-shadow(0 0 40px var(--electric)) drop-shadow(0 0 60px var(--thunder));}}
+.loader-title{font-family:'Bebas Neue',cursive;font-size:58px;letter-spacing:6px;background:linear-gradient(90deg,var(--electric),var(--lightning),var(--thunder));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% auto;animation:shimmer 3s linear infinite;line-height:1;}
+.loader-sub{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--cloud);letter-spacing:4px;margin-top:6px;margin-bottom:30px;}
+@keyframes shimmer{to{background-position:200% center;}}
+.progress-wrap{width:300px;height:3px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;margin:0 auto 16px;}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--electric),var(--thunder));border-radius:4px;width:0%;box-shadow:0 0 10px var(--electric);animation:loadBar 3s ease forwards;}
+@keyframes loadBar{to{width:100%;}}
+.progress-text{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--electric);letter-spacing:2px;}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;z-index:8888;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .5s ease;}
+.overlay.show{opacity:1;pointer-events:all;}
+.modal-box{background:linear-gradient(145deg,#0d1629,#0a1020);border:1px solid var(--glass-border);border-radius:16px;padding:34px;width:90%;max-width:430px;box-shadow:0 0 60px rgba(0,212,255,.15),0 0 120px rgba(123,47,255,.1);animation:modalIn .5s ease;max-height:90vh;overflow-y:auto;}
+@keyframes modalIn{from{transform:translateY(30px) scale(.96);opacity:0;}to{transform:translateY(0) scale(1);opacity:1;}}
+.modal-badge{display:inline-block;background:linear-gradient(90deg,var(--thunder),var(--electric));font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;padding:4px 12px;border-radius:20px;margin-bottom:14px;}
+.modal-box h2{font-family:'Bebas Neue',cursive;font-size:34px;letter-spacing:4px;background:linear-gradient(90deg,var(--electric),var(--lightning));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+.modal-box p{color:var(--cloud);font-size:14px;margin-bottom:18px;line-height:1.6;}
+.divider{display:flex;align-items:center;gap:12px;margin:14px 0;color:var(--cloud);font-size:12px;letter-spacing:2px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--glass-border);}
+.inp-group{margin-bottom:13px;}
+.inp-group label{display:block;font-size:11px;letter-spacing:2px;color:var(--electric);margin-bottom:5px;font-weight:600;}
+.inp-group input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Exo 2',sans-serif;font-size:14px;outline:none;transition:border-color .3s,box-shadow .3s;}
+.inp-group input:focus{border-color:var(--electric);box-shadow:0 0 0 3px rgba(0,212,255,.1);}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(90deg,var(--electric),var(--thunder));border:none;border-radius:8px;color:#fff;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:4px;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 20px rgba(0,212,255,.3);margin-top:4px;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,212,255,.4);}
+.btn-ghost{width:100%;padding:9px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--cloud);font-family:'Exo 2',sans-serif;font-size:13px;cursor:pointer;margin-top:8px;transition:border-color .3s;}
+.btn-ghost:hover{border-color:var(--glass-border);color:#fff;}
+
+/* SETTINGS */
+.settings-section{margin-bottom:20px;}
+.settings-title{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--electric);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--glass-border);}
+.settings-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.settings-label{font-size:13px;color:#ccc;}
+.toggle{width:40px;height:22px;background:rgba(255,255,255,.15);border-radius:20px;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;}
+.toggle.on{background:linear-gradient(90deg,var(--electric),var(--thunder));}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,.4);}
+.toggle.on::after{transform:translateX(18px);}
+.btn-sm{padding:7px 14px;background:rgba(0,212,255,.1);border:1px solid var(--glass-border);border-radius:7px;color:var(--electric);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:background .2s;}
+.btn-sm:hover{background:rgba(0,212,255,.2);}
+
+/* TOAST */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#0d2a1a,#0a1e12);border:1px solid var(--safe);border-radius:10px;padding:12px 22px;color:var(--safe);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;z-index:9999;opacity:0;transition:opacity .4s;white-space:nowrap;box-shadow:0 0 20px rgba(46,213,115,.2);}
+#toast.show{opacity:1;}
+
+/* HEADER */
+header{padding:13px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--glass-border);background:rgba(5,8,16,.92);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
+.brand{font-family:'Bebas Neue',cursive;font-size:25px;letter-spacing:3px;background:linear-gradient(90deg,var(--electric),var(--lightning));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.brand span{-webkit-text-fill-color:var(--thunder);}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.live-badge{display:flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--safe);letter-spacing:2px;}
+.live-dot{width:7px;height:7px;background:var(--safe);border-radius:50%;animation:blink 1.5s ease-in-out infinite;box-shadow:0 0 6px var(--safe);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hdr-btn{background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;color:#fff;font-family:'Exo 2',sans-serif;font-size:12px;padding:5px 12px;cursor:pointer;transition:background .2s;}
+.hdr-btn:hover{background:rgba(255,255,255,.1);}
+#nl-btn{background:linear-gradient(90deg,rgba(123,47,255,.4),rgba(0,212,255,.3));border:1px solid var(--thunder);border-radius:8px;color:#fff;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:5px 12px;cursor:pointer;white-space:nowrap;transition:opacity .3s,max-width .4s,padding .3s,margin .3s;max-width:300px;overflow:hidden;}
+#nl-btn.hidden{opacity:0;pointer-events:none;max-width:0;padding:0;margin:0;}
+.uname{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--electric);}
+
+/* DOC BANNER */
+#doc-banner{max-width:1100px;margin:14px auto 0;padding:0 22px;display:none;}
+.doc-inner{background:linear-gradient(90deg,rgba(0,212,255,.07),rgba(123,47,255,.05));border:1px solid var(--glass-border);border-radius:12px;padding:13px 18px;display:flex;align-items:flex-start;gap:10px;}
+.doc-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.doc-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--electric);margin-bottom:3px;}
+.doc-txt{font-size:13px;color:#d0d8e8;line-height:1.6;}
+
+/* ALERTS */
+#alerts-zone{max-width:1100px;margin:12px auto 0;padding:0 22px;display:flex;flex-direction:column;gap:7px;}
+.abar{border-radius:10px;padding:10px 16px;display:flex;align-items:flex-start;gap:10px;font-size:13px;}
+.abar.warning{background:linear-gradient(90deg,rgba(255,71,87,.12),rgba(255,71,87,.04));border:1px solid rgba(255,71,87,.35);animation:pulseR 3s ease-in-out infinite;}
+.abar.watch{background:linear-gradient(90deg,rgba(255,159,67,.1),rgba(255,159,67,.04));border:1px solid rgba(255,159,67,.35);animation:pulseO 3s ease-in-out infinite;}
+.abar.advisory{background:linear-gradient(90deg,rgba(255,230,100,.07),rgba(255,230,100,.03));border:1px solid rgba(255,230,100,.3);}
+.abar.spc{background:linear-gradient(90deg,rgba(123,47,255,.1),rgba(123,47,255,.04));border:1px solid rgba(123,47,255,.35);animation:pulseP 3s ease-in-out infinite;}
+@keyframes pulseR{0%,100%{border-color:rgba(255,71,87,.35);}50%{border-color:rgba(255,71,87,.7);box-shadow:0 0 16px rgba(255,71,87,.12);}}
+@keyframes pulseO{0%,100%{border-color:rgba(255,159,67,.35);}50%{border-color:rgba(255,159,67,.7);box-shadow:0 0 16px rgba(255,159,67,.1);}}
+@keyframes pulseP{0%,100%{border-color:rgba(123,47,255,.35);}50%{border-color:rgba(123,47,255,.7);box-shadow:0 0 16px rgba(123,47,255,.12);}}
+.abar-icon{font-size:17px;flex-shrink:0;margin-top:1px;}
+.abar-txt{color:#ffd0d0;line-height:1.5;}
+.abar-txt.ot{color:#ffe0cc;}.abar-txt.pt{color:#ddd0ff;}
+
+/* HERO GRID */
+.hero{padding:18px 22px 16px;display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1100px;margin:0 auto;}
+@media(max-width:700px){.hero{grid-template-columns:1fr;}}
+.card{background:linear-gradient(145deg,rgba(20,30,60,.8),rgba(10,15,30,.9));border:1px solid var(--glass-border);border-radius:20px;padding:26px;position:relative;overflow:hidden;backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);transition:background .8s;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--electric),var(--thunder),transparent);opacity:.7;}
+.card.wx-sunny{background:linear-gradient(145deg,rgba(255,180,50,.16),rgba(255,140,0,.09),rgba(10,15,30,.85)) !important;}
+.card.wx-cloudy{background:linear-gradient(145deg,rgba(60,80,120,.25),rgba(30,45,80,.2),rgba(10,15,30,.85)) !important;}
+.card.wx-rain{background:linear-gradient(145deg,rgba(0,90,180,.2),rgba(0,50,110,.15),rgba(5,10,20,.9)) !important;}
+.card.wx-storm{background:linear-gradient(145deg,rgba(90,0,180,.2),rgba(40,0,90,.15),rgba(5,8,16,.92)) !important;}
+.card.wx-snow{background:linear-gradient(145deg,rgba(180,210,255,.13),rgba(120,160,220,.09),rgba(10,15,30,.85)) !important;}
+.card.wx-fog{background:linear-gradient(145deg,rgba(100,110,130,.2),rgba(70,80,100,.15),rgba(10,15,30,.85)) !important;}
+.card.wx-night{background:linear-gradient(145deg,rgba(10,20,70,.3),rgba(5,10,45,.25),rgba(5,8,16,.92)) !important;}
+.wx-canvas{position:absolute;inset:0;pointer-events:none;border-radius:20px;opacity:.3;}
+.loc-lbl{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--electric);letter-spacing:3px;margin-bottom:4px;}
+.city{font-family:'Bebas Neue',cursive;font-size:46px;letter-spacing:4px;line-height:1;margin-bottom:2px;}
+.state{font-size:12px;color:var(--cloud);letter-spacing:2px;margin-bottom:16px;}
+.temp-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;}
+.temp-big{font-family:'Bebas Neue',cursive;font-size:92px;line-height:1;background:linear-gradient(135deg,#fff,var(--electric));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.temp-deg{font-family:'Bebas Neue',cursive;font-size:32px;color:var(--cloud);margin-top:12px;}
+.cond-txt{font-size:15px;font-weight:300;color:var(--cloud);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+#next-event{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--lightning);letter-spacing:.5px;margin-bottom:16px;min-height:16px;display:flex;align-items:center;gap:5px;}
+.wx-icon-big{font-size:68px;position:absolute;top:20px;right:20px;filter:drop-shadow(0 0 20px rgba(0,212,255,.4));animation:float 4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.s{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:11px 13px;transition:background .2s,transform .2s;cursor:default;}
+.s:hover{background:rgba(0,212,255,.05);transform:translateY(-2px);border-color:rgba(0,212,255,.2);}
+.sl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cloud);letter-spacing:2px;margin-bottom:2px;}
+.sv{font-family:'Bebas Neue',cursive;font-size:21px;letter-spacing:1px;color:var(--electric);}
+.su{font-size:11px;color:var(--cloud);}
+
+/* FORECAST */
+.fsec{max-width:1100px;margin:0 auto;padding:0 22px 22px;}
+.sec-ttl{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:4px;color:var(--electric);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec-ttl::after{content:'';flex:1;height:1px;background:var(--glass-border);}
+.fg{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;}
+@media(max-width:600px){.fg{grid-template-columns:repeat(3,1fr);}}
+.fc{background:linear-gradient(145deg,rgba(20,30,60,.6),rgba(10,15,30,.7));border:1px solid var(--glass-border);border-radius:13px;padding:14px 9px;text-align:center;transition:transform .2s,box-shadow .2s;cursor:default;}
+.fc:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,212,255,.1);}
+.fd{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cloud);letter-spacing:2px;margin-bottom:7px;}
+.fi{font-size:24px;margin-bottom:6px;}
+.fh{font-family:'Bebas Neue',cursive;font-size:22px;color:#fff;}
+.fp{font-size:11px;color:var(--electric);margin-top:3px;font-family:'Share Tech Mono',monospace;}
+
+/* DETAIL TABS */
+.dsec{max-width:1100px;margin:0 auto;padding:0 22px 28px;}
+.tabs{display:flex;gap:3px;margin-bottom:16px;background:rgba(255,255,255,.03);border-radius:10px;padding:4px;width:fit-content;flex-wrap:wrap;}
+.tab{padding:6px 16px;border-radius:8px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;border:none;color:var(--cloud);background:transparent;transition:all .2s;}
+.tab.active{background:linear-gradient(90deg,var(--thunder),rgba(0,212,255,.8));color:#fff;box-shadow:0 4px 12px rgba(123,47,255,.3);}
+.tc{display:none;}.tc.active{display:block;}
+.dg{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
+@media(max-width:600px){.dg{grid-template-columns:1fr 1fr;}}
+.dc{background:linear-gradient(145deg,rgba(20,30,60,.6),rgba(10,15,30,.7));border:1px solid var(--glass-border);border-radius:13px;padding:17px;transition:transform .2s;}
+.dc:hover{transform:translateY(-3px);}
+.di{font-size:24px;margin-bottom:7px;}
+.dl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--cloud);letter-spacing:2px;margin-bottom:2px;}
+.dv{font-family:'Bebas Neue',cursive;font-size:24px;letter-spacing:1px;background:linear-gradient(90deg,#fff,var(--electric));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.ds{font-size:11px;color:var(--cloud);margin-top:2px;}
+
+/* RADAR */
+.rsec{max-width:1100px;margin:0 auto;padding:0 22px 34px;}
+.rcrd{background:linear-gradient(145deg,rgba(20,30,60,.6),rgba(10,15,30,.7));border:1px solid var(--glass-border);border-radius:16px;padding:20px;display:flex;align-items:center;justify-content:center;min-height:130px;text-align:center;cursor:pointer;transition:box-shadow .3s;position:relative;overflow:hidden;}
+.rcrd:hover{box-shadow:0 0 40px rgba(0,212,255,.12);}
+.rbg{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 30px,rgba(0,212,255,.03) 30px,rgba(0,212,255,.03) 31px),repeating-linear-gradient(90deg,transparent,transparent 30px,rgba(0,212,255,.03) 30px,rgba(0,212,255,.03) 31px);animation:gridMove 20s linear infinite;}
+@keyframes gridMove{to{transform:translate(31px,31px);}}
+.rcon{position:relative;}.ricn{font-size:42px;margin-bottom:9px;display:block;}
+.rttl{font-family:'Bebas Neue',cursive;font-size:19px;letter-spacing:3px;margin-bottom:4px;}
+.rsub{font-size:12px;color:var(--cloud);}
+
+.fade-up{opacity:0;transform:translateY(20px);animation:fadeUp .6s ease forwards;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+.d1{animation-delay:.1s;}.d2{animation-delay:.2s;}.d3{animation-delay:.3s;}.d4{animation-delay:.4s;}
+footer{text-align:center;padding:16px;color:var(--cloud);font-size:11px;letter-spacing:2px;font-family:'Share Tech Mono',monospace;border-top:1px solid var(--glass-border);}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="storm-bg"></div>
+  <div class="rain-container" id="rain"></div>
+  <div class="cloud-wrap">
+    <div class="lcloud"></div><div class="lcloud"></div><div class="lcloud"></div>
+  </div>
+  <div class="lightning-container">
+    <div class="bolt"><svg width="60" height="180" viewBox="0 0 60 180"><polyline points="35,0 15,80 30,80 5,180 50,70 32,70 55,0" fill="#ffe566" stroke="#fff" stroke-width="1"/></svg></div>
+    <div class="bolt"><svg width="50" height="160" viewBox="0 0 50 160"><polyline points="30,0 12,70 25,70 4,160 44,60 27,60 48,0" fill="#ffe566" stroke="#fff" stroke-width="1"/></svg></div>
+    <div class="bolt"><svg width="70" height="200" viewBox="0 0 70 200"><polyline points="42,0 20,90 36,90 6,200 60,80 38,80 65,0" fill="#ffe566" stroke="#fff" stroke-width="1"/></svg></div>
+    <div class="bolt"><svg width="45" height="150" viewBox="0 0 45 150"><polyline points="28,0 10,65 22,65 3,150 40,55 24,55 44,0" fill="#ffe566" stroke="#fff" stroke-width="1"/></svg></div>
+    <div class="bolt"><svg width="55" height="170" viewBox="0 0 55 170"><polyline points="32,0 14,75 28,75 5,170 48,65 30,65 52,0" fill="#ffe566" stroke="#fff" stroke-width="1"/></svg></div>
+  </div>
+  <div class="flash"></div><div class="flash"></div><div class="flash"></div>
+  <div class="loader-content">
+    <span class="loader-icon">⛈️</span>
+    <div class="loader-title">miguelito4u Wx</div>
+    <div class="loader-sub">CLINTON, IOWA WEATHER COMMAND</div>
+    <div class="progress-wrap"><div class="progress-bar"></div></div>
+    <div class="progress-text" id="load-text">INITIALIZING STORM DATA...</div>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div id="signup-ov" class="overlay">
+  <div class="modal-box">
+    <div class="modal-badge">⚡ NEW VISITOR DETECTED</div>
+    <h2>Join The Storm</h2>
+    <p>Create your free account to save preferences and stay ahead of every storm in Clinton, Iowa.</p>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;letter-spacing:2px;color:var(--electric);font-family:'Share Tech Mono',monospace;margin-bottom:7px;">📧 WEATHER ALERTS NEWSLETTER</div>
+      <form method="POST" action="https://6b435943.sibforms.com/serve/MUIFABFE1-RPlZVqgwrLhVKM3wiK47TPtIglPhb8h1waJ9LTaSevphbeEJ5KECulLI0vKX2SBV3MCjMKrEdb6tdoBpgNUaVoVwZs7D-TkpYM2H6ZwY600pvNEcVxx93LDYRW3SsM0XVOBeh7PpHGiS4wjuz9-jwrZbSWeEQEh59f4ZQ85bVuXsYcgfjEeTJ-Zo-q1r_Ye95_x8Md3A==" data-type="subscription" target="_blank">
+        <input type="email" name="EMAIL" placeholder="your@email.com" required style="width:100%;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:8px;padding:10px 14px;color:#fff;font-family:'Exo 2',sans-serif;font-size:13px;outline:none;margin-bottom:7px;"/>
+        <input type="text" name="email_address_check" value="" style="display:none"><input type="hidden" name="locale" value="en">
+        <button type="submit" style="width:100%;padding:9px;background:linear-gradient(90deg,rgba(0,212,255,.25),rgba(123,47,255,.25));border:1px solid var(--glass-border);border-radius:8px;color:var(--electric);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;">SUBSCRIBE TO NEWSLETTER →</button>
+      </form>
+    </div>
+    <div class="divider">OR CREATE ACCOUNT</div>
+    <div class="inp-group"><label>YOUR NAME</label><input type="text" id="su-name" placeholder="e.g. Miguel"/></div>
+    <div class="inp-group"><label>PASSWORD</label><input type="password" id="su-pass" placeholder="Create a password"/></div>
+    <button class="btn-primary" onclick="createAccount()">⚡ CREATE ACCOUNT</button>
+    <button class="btn-ghost" onclick="skipSignup()">Skip for now — just show me the weather</button>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings-ov" class="overlay">
+  <div class="modal-box" style="max-width:460px;">
+    <h2>⚙️ Settings</h2>
+    <div class="settings-section">
+      <div class="settings-title">ACCOUNT</div>
+      <div class="settings-row"><div class="settings-label">Logged in as: <span id="s-uname" style="color:var(--electric);">Guest</span></div><button class="btn-sm" onclick="logoutUser()">LOG OUT</button></div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <input type="text" id="s-name-in" placeholder="Change name..." style="flex:1;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:7px;padding:8px 12px;color:#fff;font-size:12px;outline:none;"/>
+        <button class="btn-sm" onclick="saveName()">SAVE</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">NEWSLETTER</div>
+      <div class="settings-row"><div class="settings-label">Subscribe to weather update emails</div><button class="btn-sm" onclick="openNL()">OPEN FORM</button></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">DISPLAY OPTIONS</div>
+      <div class="settings-row"><div class="settings-label">Weather background on main card</div><div class="toggle on" id="tgl-wxbg" onclick="toggleS(this,'wxbg')"></div></div>
+      <div class="settings-row"><div class="settings-label">Show SPC severe weather risk</div><div class="toggle on" id="tgl-spc" onclick="toggleS(this,'spc')"></div></div>
+      <div class="settings-row"><div class="settings-label">Show NWS watches / warnings</div><div class="toggle on" id="tgl-nws" onclick="toggleS(this,'nws')"></div></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-title">DATA</div>
+      <div class="settings-row"><div class="settings-label">Auto-refresh every 10 minutes</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--safe);">✓ ACTIVE</div></div>
+      <div class="settings-row"><div class="settings-label">Clear account data</div><button class="btn-sm" style="border-color:rgba(255,71,87,.4);color:#ff8888;" onclick="clearAll()">RESET ALL</button></div>
+    </div>
+    <button class="btn-ghost" onclick="closeSettings()">CLOSE SETTINGS</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+
+  <header>
+    <div class="brand">miguelito4u <span>Wx</span></div>
+    <div class="hdr-right">
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <button id="nl-btn" onclick="openNL()">📧 SIGNUP FOR WEATHER UPDATES</button>
+      <div class="uname" id="uname-disp"></div>
+      <button class="hdr-btn" onclick="openSettings()">⚙️ Settings</button>
+    </div>
+  </header>
+
+  <!-- Google Doc Banner -->
+  <div id="doc-banner">
+    <div class="doc-inner">
+      <div class="doc-icon">📋</div>
+      <div>
+        <div class="doc-lbl">WEATHER UPDATE</div>
+        <div class="doc-txt" id="doc-txt"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NWS + SPC Alerts -->
+  <div id="alerts-zone"></div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="card fade-up d1" id="main-card">
+      <canvas class="wx-canvas" id="wx-cv"></canvas>
+      <div class="wx-icon-big" id="main-icon">⛅</div>
+      <div class="loc-lbl">📍 CLINTON, IOWA</div>
+      <div class="city">CLINTON</div>
+      <div class="state">IOWA, USA · 52732</div>
+      <div class="temp-row">
+        <div class="temp-big" id="main-temp">--</div>
+        <div class="temp-deg">°F</div>
+      </div>
+      <div class="cond-txt" id="main-cond">Loading...</div>
+      <div id="next-event">⏱ Fetching next event...</div>
+      <div class="sg">
+        <div class="s"><div class="sl">FEELS LIKE</div><div class="sv" id="feels">--<span class="su">°F</span></div></div>
+        <div class="s"><div class="sl">HUMIDITY</div><div class="sv" id="hum">--<span class="su">%</span></div></div>
+        <div class="s"><div class="sl">WIND</div><div class="sv" id="wind">--<span class="su"> mph</span></div></div>
+        <div class="s"><div class="sl">PRESSURE</div><div class="sv" id="pres">--<span class="su"> hPa</span></div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card fade-up d2" style="padding:20px;">
+        <div class="sec-ttl" style="margin-bottom:12px;">SUN / SKY</div>
+        <div class="sg">
+          <div class="s"><div class="sl">SUNRISE</div><div class="sv" id="sunrise" style="font-size:16px;">--:--</div></div>
+          <div class="s"><div class="sl">SUNSET</div><div class="sv" id="sunset" style="font-size:16px;">--:--</div></div>
+          <div class="s"><div class="sl">VISIBILITY</div><div class="sv" id="vis">--<span class="su"> mi</span></div></div>
+          <div class="s"><div class="sl">CLOUD COVER</div><div class="sv" id="clouds">--<span class="su">%</span></div></div>
+        </div>
+      </div>
+      <div class="card fade-up d3" style="padding:20px;">
+        <div class="sec-ttl" style="margin-bottom:12px;">ATMOSPHERE</div>
+        <div class="sg">
+          <div class="s"><div class="sl">DEW POINT</div><div class="sv" id="dew">--<span class="su">°F</span></div></div>
+          <div class="s"><div class="sl">WIND DIR</div><div class="sv" id="wdir" style="font-size:16px;">--</div></div>
+          <div class="s"><div class="sl">TODAY HIGH</div><div class="sv" id="t-hi">--<span class="su">°F</span></div></div>
+          <div class="s"><div class="sl">TODAY LOW</div><div class="sv" id="t-lo">--<span class="su">°F</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forecast -->
+  <div class="fsec fade-up d2">
+    <div class="sec-ttl">5-DAY FORECAST</div>
+    <div class="fg" id="fgrid"></div>
+  </div>
+
+  <!-- Detail Tabs -->
+  <div class="dsec fade-up d3">
+    <div class="sec-ttl">DETAILED CONDITIONS</div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this,'t-atm')">ATMOSPHERE</button>
+      <button class="tab" onclick="switchTab(this,'t-wind')">WIND</button>
+      <button class="tab" onclick="switchTab(this,'t-precip')">PRECIPITATION</button>
+      <button class="tab" onclick="switchTab(this,'t-set')">SETTINGS</button>
+    </div>
+    <div id="t-atm" class="tc active">
+      <div class="dg">
+        <div class="dc"><div class="di">🌡️</div><div class="dl">TEMPERATURE</div><div class="dv" id="d-temp">--°F</div><div class="ds">Current reading</div></div>
+        <div class="dc"><div class="di">💧</div><div class="dl">HUMIDITY</div><div class="dv" id="d-hum">--%</div><div class="ds">Relative humidity</div></div>
+        <div class="dc"><div class="di">📊</div><div class="dl">PRESSURE</div><div class="dv" id="d-pres">-- hPa</div><div class="ds">Sea level</div></div>
+      </div>
+    </div>
+    <div id="t-wind" class="tc">
+      <div class="dg">
+        <div class="dc"><div class="di">💨</div><div class="dl">WIND SPEED</div><div class="dv" id="d-wind">-- mph</div><div class="ds">Sustained</div></div>
+        <div class="dc"><div class="di">🌀</div><div class="dl">WIND GUST</div><div class="dv" id="d-gust">-- mph</div><div class="ds">Peak gust</div></div>
+        <div class="dc"><div class="di">🧭</div><div class="dl">DIRECTION</div><div class="dv" id="d-dir">--</div><div class="ds">Wind bearing</div></div>
+      </div>
+    </div>
+    <div id="t-precip" class="tc">
+      <div class="dg">
+        <div class="dc"><div class="di">🌧️</div><div class="dl">RAIN (1H)</div><div class="dv" id="d-rain">-- in</div><div class="ds">Last hour</div></div>
+        <div class="dc"><div class="di">☁️</div><div class="dl">CLOUD COVER</div><div class="dv" id="d-cloud">--%</div><div class="ds">Sky coverage</div></div>
+        <div class="dc"><div class="di">👁️</div><div class="dl">VISIBILITY</div><div class="dv" id="d-vis">-- mi</div><div class="ds">Ground level</div></div>
+      </div>
+    </div>
+    <div id="t-set" class="tc">
+      <div class="dg">
+        <div class="dc" onclick="openSettings()" style="cursor:pointer;"><div class="di">⚙️</div><div class="dl">OPEN SETTINGS</div><div class="dv" style="font-size:18px;">CLICK</div><div class="ds">Account, display, alerts</div></div>
+        <div class="dc" onclick="openNL()" style="cursor:pointer;"><div class="di">📧</div><div class="dl">NEWSLETTER</div><div class="dv" style="font-size:18px;">SUBSCRIBE</div><div class="ds">Weather update emails</div></div>
+        <div class="dc" onclick="window.open('https://radar.weather.gov/station/KDVN/standard','_blank')" style="cursor:pointer;"><div class="di">📡</div><div class="dl">NWS RADAR</div><div class="dv" style="font-size:18px;">OPEN</div><div class="ds">Quad Cities Doppler</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Radar -->
+  <div class="rsec fade-up d4">
+    <div class="sec-ttl">RADAR & MAPS</div>
+    <div class="rcrd" onclick="window.open('https://radar.weather.gov/station/KDVN/standard','_blank')">
+      <div class="rbg"></div>
+      <div class="rcon">
+        <span class="ricn">📡</span>
+        <div class="rttl">OPEN NWS RADAR — QUAD CITIES (KDVN)</div>
+        <div class="rsub">Click to view live Doppler radar for Clinton, Iowa region</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>miguelito4u Wx &nbsp;·&nbsp; Clinton, Iowa &nbsp;·&nbsp; <span id="ft"></span></footer>
+</div>
+
+<script>
+const API='57c7b683b5956e618120b801050ab41c',LAT=41.8442,LON=-90.1887;
+const NWS_ZONE='IAZ027';
+const GDOC='https://docs.google.com/document/d/e/2PACX-1vTYAeCc32teLz-nhgFylnZdtcXCOpdTyvJfVdzDFRpQ1sZfAOiGU0RDDJmbVLRXjO75bIqdm2V4ExoJ/pub';
+
+// LOADER RAIN
+(()=>{const r=document.getElementById('rain');for(let i=0;i<80;i++){const d=document.createElement('div');d.className='raindrop';d.style.cssText=`left:${Math.random()*100}%;height:${30+Math.random()*80}px;animation-duration:${.5+Math.random()}s;animation-delay:${Math.random()*2}s;opacity:${.3+Math.random()*.5};`;r.appendChild(d);}})();
+
+const msgs=['INITIALIZING STORM DATA...','ACQUIRING SATELLITE FEED...','CALIBRATING DOPPLER ARRAY...','PARSING ATMOSPHERIC DATA...','LOADING CLINTON IOWA...','READY ⚡'];
+let mi=0;const lt=document.getElementById('load-text');
+const lti=setInterval(()=>{mi++;if(mi<msgs.length)lt.textContent=msgs[mi];else clearInterval(lti);},520);
+
+setTimeout(()=>{
+  document.getElementById('loader').classList.add('fade-out');
+  setTimeout(()=>{document.getElementById('loader').style.display='none';document.getElementById('app').style.display='block';initApp();},800);
+},3200);
+
+// SETTINGS DEFAULTS
+const DEFS={wxbg:true,spc:true,nws:true};
+function getS(k){const s=JSON.parse(localStorage.getItem('m4u_s')||'{}');return s[k]!==undefined?s[k]:DEFS[k];}
+function toggleS(el,k){el.classList.toggle('on');const s=JSON.parse(localStorage.getItem('m4u_s')||'{}');s[k]=el.classList.contains('on');localStorage.setItem('m4u_s',JSON.stringify(s));}
+function loadToggles(){Object.keys(DEFS).forEach(k=>{const el=document.getElementById('tgl-'+k);if(el)el.classList.toggle('on',getS(k));});}
+
+// INIT
+function initApp(){
+  loadToggles();
+  const name=localStorage.getItem('m4u_name');
+  const visited=localStorage.getItem('m4u_v');
+  if(name){
+    document.getElementById('uname-disp').textContent='👋 '+name;
+    document.getElementById('s-uname').textContent=name;
+  }
+  // newsletter button: hide if dismissed
+  if(localStorage.getItem('m4u_nl')==='1')document.getElementById('nl-btn').classList.add('hidden');
+  // show signup only if never visited and no account
+  if(!visited&&!name)setTimeout(()=>document.getElementById('signup-ov').classList.add('show'),600);
+  fetchAll();fetchGDoc();
+  setInterval(fetchAll,600000);setInterval(fetchGDoc,300000);
+}
+
+// ACCOUNT
+function createAccount(){
+  const n=document.getElementById('su-name').value.trim();
+  const p=document.getElementById('su-pass').value.trim();
+  if(!n){toast('⚠ Enter your name!');return;}
+  if(p.length<4){toast('⚠ Password must be 4+ chars!');return;}
+  localStorage.setItem('m4u_v','1');localStorage.setItem('m4u_name',n);localStorage.setItem('m4u_pass',btoa(p));
+  document.getElementById('uname-disp').textContent='👋 '+n;
+  document.getElementById('s-uname').textContent=n;
+  document.getElementById('signup-ov').classList.remove('show');
+  toast('✅ Welcome, '+n+'!');
+}
+function skipSignup(){localStorage.setItem('m4u_v','1');document.getElementById('signup-ov').classList.remove('show');}
+function logoutUser(){localStorage.removeItem('m4u_name');localStorage.removeItem('m4u_pass');document.getElementById('uname-disp').textContent='';document.getElementById('s-uname').textContent='Guest';closeSettings();toast('👋 Logged out.');}
+function saveName(){const n=document.getElementById('s-name-in').value.trim();if(!n){toast('⚠ Enter a name');return;}localStorage.setItem('m4u_name',n);localStorage.setItem('m4u_v','1');document.getElementById('uname-disp').textContent='👋 '+n;document.getElementById('s-uname').textContent=n;toast('✅ Name saved: '+n);}
+function clearAll(){localStorage.clear();location.reload();}
+
+// NL BUTTON
+function openNL(){document.getElementById('nl-btn').classList.add('hidden');localStorage.setItem('m4u_nl','1');document.getElementById('signup-ov').classList.add('show');}
+
+// SETTINGS MODAL
+function openSettings(){loadToggles();const n=localStorage.getItem('m4u_name')||'Guest';document.getElementById('s-uname').textContent=n;document.getElementById('settings-ov').classList.add('show');}
+function closeSettings(){document.getElementById('settings-ov').classList.remove('show');}
+document.getElementById('settings-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
+document.getElementById('signup-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)skipSignup();});
+
+// TABS
+function switchTab(btn,id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tc').forEach(t=>t.classList.remove('active'));btn.classList.add('active');document.getElementById(id).classList.add('active');}
+
+// TOAST
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show';setTimeout(()=>t.className='toast',3500);}
+
+// CLOCK
+function clock(){const n=new Date();document.getElementById('ft').textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+setInterval(clock,1000);clock();
+
+// HELPERS
+function deg2comp(d){return['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(d/22.5)%16];}
+function m2mi(m){return(m/1609.34).toFixed(1);}
+function unix2t(ts){const d=new Date(ts*1000);let h=d.getHours(),m=d.getMinutes().toString().padStart(2,'0');const ap=h>=12?'PM':'AM';h=h%12||12;return`${h}:${m} ${ap}`;}
+function wxIcon(id,day){if(id>=200&&id<300)return'⛈️';if(id>=300&&id<400)return'🌦️';if(id>=500&&id<600)return'🌧️';if(id>=600&&id<700)return'❄️';if(id>=700&&id<800)return'🌫️';if(id===800)return day?'☀️':'🌙';if(id===801)return day?'🌤️':'☁️';if(id<=804)return'☁️';return'🌡️';}
+function wxClass(id,day){if(id>=200&&id<300)return'wx-storm';if(id>=300&&id<600)return'wx-rain';if(id>=600&&id<700)return'wx-snow';if(id>=700&&id<800)return'wx-fog';if(id===800)return day?'wx-sunny':'wx-night';if(id<=804)return'wx-cloudy';return'wx-cloudy';}
+
+// CANVAS WEATHER BG
+function drawCanvas(cls){
+  if(!getS('wxbg'))return;
+  const cv=document.getElementById('wx-cv');
+  const W=cv.parentElement.offsetWidth,H=cv.parentElement.offsetHeight;
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,W,H);
+  if(cls==='wx-sunny'){
+    ctx.save();ctx.translate(W-55,55);
+    for(let i=0;i<8;i++){ctx.save();ctx.rotate(i*Math.PI/4);const g=ctx.createLinearGradient(0,0,0,80);g.addColorStop(0,'rgba(255,200,60,.55)');g.addColorStop(1,'rgba(255,200,60,0)');ctx.fillStyle=g;ctx.fillRect(-4,28,8,65);ctx.restore();}
+    ctx.restore();
+  } else if(cls==='wx-rain'||cls==='wx-storm'){
+    for(let i=0;i<55;i++){const x=Math.random()*W,y=Math.random()*H,l=15+Math.random()*20;ctx.strokeStyle=`rgba(100,180,255,${.1+Math.random()*.22})`;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-4,y+l);ctx.stroke();}
+  } else if(cls==='wx-snow'){
+    for(let i=0;i<45;i++){const x=Math.random()*W,y=Math.random()*H,r=1+Math.random()*3;ctx.fillStyle=`rgba(200,220,255,${.15+Math.random()*.3})`;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+  } else if(cls==='wx-cloudy'||cls==='wx-fog'){
+    for(let i=0;i<5;i++){const x=Math.random()*W,y=Math.random()*H*.6,r=50+Math.random()*90;const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(120,140,180,.12)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+  } else if(cls==='wx-night'){
+    for(let i=0;i<40;i++){const x=Math.random()*W,y=Math.random()*H*.7,r=.5+Math.random()*1.5;ctx.fillStyle=`rgba(255,255,255,${.1+Math.random()*.4})`;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+  }
+}
+
+// NEXT EVENT
+let fcItems=[];
+function nextEvent(){
+  const el=document.getElementById('next-event');
+  if(!fcItems.length){el.textContent='⏱ Fetching next event...';return;}
+  const now=Date.now()/1000;
+  const next=fcItems.find(f=>f.dt>now&&(f.pop>0.3||f.weather[0].id<700));
+  if(!next){el.textContent='No significant weather in next 40h';return;}
+  const mins=Math.round((next.dt-now)/60);
+  const hrs=Math.floor(mins/60),rm=mins%60;
+  const desc=next.weather[0].description;
+  const ic=wxIcon(next.weather[0].id,true);
+  const cap=desc.charAt(0).toUpperCase()+desc.slice(1);
+  if(mins<1)el.textContent=ic+' '+cap+' happening now!';
+  else if(mins<60)el.textContent=ic+' '+cap+' starting in '+mins+' min';
+  else if(hrs<24)el.textContent=ic+' '+cap+' in ~'+hrs+'h '+rm+'m';
+  else el.textContent=ic+' Next event in '+(Math.floor(mins/1440))+'d';
+}
+
+// FETCH ALL
+async function fetchAll(){await Promise.all([fetchWx(),fetchFc(),fetchAlerts()]);}
+
+// CURRENT WEATHER
+async function fetchWx(){
+  try{
+    const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API}&units=imperial`);
+    const d=await r.json();if(d.cod!==200)throw 0;
+    const isDay=d.dt>d.sys.sunrise&&d.dt<d.sys.sunset;
+    const ic=wxIcon(d.weather[0].id,isDay);
+    const cls=wxClass(d.weather[0].id,isDay);
+    document.getElementById('main-icon').textContent=ic;
+    document.getElementById('main-temp').textContent=Math.round(d.main.temp);
+    document.getElementById('main-cond').textContent=d.weather[0].description.toUpperCase();
+    document.getElementById('feels').innerHTML=Math.round(d.main.feels_like)+'<span class="su">°F</span>';
+    document.getElementById('hum').innerHTML=d.main.humidity+'<span class="su">%</span>';
+    document.getElementById('wind').innerHTML=Math.round(d.wind.speed)+'<span class="su"> mph</span>';
+    document.getElementById('pres').innerHTML=d.main.pressure+'<span class="su"> hPa</span>';
+    document.getElementById('sunrise').textContent=unix2t(d.sys.sunrise);
+    document.getElementById('sunset').textContent=unix2t(d.sys.sunset);
+    document.getElementById('vis').innerHTML=m2mi(d.visibility)+'<span class="su"> mi</span>';
+    document.getElementById('clouds').innerHTML=d.clouds.all+'<span class="su">%</span>';
+    document.getElementById('dew').innerHTML=Math.round(d.main.temp-(100-d.main.humidity)/5)+'<span class="su">°F</span>';
+    document.getElementById('wdir').textContent=deg2comp(d.wind.deg);
+    document.getElementById('d-temp').textContent=Math.round(d.main.temp)+'°F';
+    document.getElementById('d-hum').textContent=d.main.humidity+'%';
+    document.getElementById('d-pres').textContent=d.main.pressure+' hPa';
+    document.getElementById('d-wind').textContent=Math.round(d.wind.speed)+' mph';
+    document.getElementById('d-gust').textContent=d.wind.gust?Math.round(d.wind.gust)+' mph':'N/A';
+    document.getElementById('d-dir').textContent=deg2comp(d.wind.deg)+' ('+d.wind.deg+'°)';
+    document.getElementById('d-rain').textContent=d.rain?(d.rain['1h']/25.4).toFixed(2)+' in':'0.00 in';
+    document.getElementById('d-cloud').textContent=d.clouds.all+'%';
+    document.getElementById('d-vis').textContent=m2mi(d.visibility)+' mi';
+    const mc=document.getElementById('main-card');
+    mc.className='card fade-up d1';
+    if(getS('wxbg'))mc.classList.add(cls);
+    setTimeout(()=>drawCanvas(cls),100);
+  }catch(e){console.error('wx',e);}
+}
+
+// FORECAST
+async function fetchFc(){
+  try{
+    const r=await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&appid=${API}&units=imperial&cnt=40`);
+    const d=await r.json();if(d.cod!=='200')throw 0;
+    fcItems=d.list;nextEvent();
+    const days={};d.list.forEach(i=>{const dt=i.dt_txt.split(' ')[0];if(!days[dt])days[dt]=[];days[dt].push(i);});
+    const g=document.getElementById('fgrid');g.innerHTML='';
+    const DN=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    let todayKey=null;
+    Object.keys(days).slice(0,5).forEach((k,i)=>{
+      if(i===0)todayKey=k;
+      const its=days[k];
+      const hi=Math.round(Math.max(...its.map(x=>x.main.temp_max)));
+      const lo=Math.round(Math.min(...its.map(x=>x.main.temp_min)));
+      const n=its.find(x=>x.dt_txt.includes('12:00:00'))||its[0];
+      const pop=Math.round((n.pop||0)*100);
+      const dn=i===0?'TODAY':DN[new Date(k+'T12:00:00').getDay()];
+      const c=document.createElement('div');c.className='fc';
+      c.innerHTML=`<div class="fd">${dn}</div><div class="fi">${wxIcon(n.weather[0].id,true)}</div><div class="fh">${hi}°<span style="font-size:13px;color:var(--cloud)"> /${lo}°</span></div><div class="fp">💧 ${pop}%</div>`;
+      g.appendChild(c);
+    });
+    if(todayKey){
+      const ti=days[todayKey];
+      document.getElementById('t-hi').innerHTML=Math.round(Math.max(...ti.map(x=>x.main.temp_max)))+'<span class="su">°F</span>';
+      document.getElementById('t-lo').innerHTML=Math.round(Math.min(...ti.map(x=>x.main.temp_min)))+'<span class="su">°F</span>';
+    }
+  }catch(e){console.error('fc',e);}
+}
+
+// NWS + SPC ALERTS
+async function fetchAlerts(){
+  const z=document.getElementById('alerts-zone');z.innerHTML='';
+  let hasNws=false;
+  if(getS('nws')){
+    try{
+      const r=await fetch(`https://api.weather.gov/alerts/active?zone=${NWS_ZONE}`,{headers:{Accept:'application/geo+json','User-Agent':'miguelito4u-wx/1.0 (wx app)'}});
+      const d=await r.json();
+      if(d.features&&d.features.length>0){
+        hasNws=true;
+        d.features.slice(0,4).forEach(f=>{
+          const p=f.properties,evt=(p.event||'').toLowerCase();
+          let cls='advisory',icon='ℹ️',tc='';
+          if(evt.includes('warning')){cls='warning';icon='🚨';}
+          else if(evt.includes('watch')){cls='watch';icon='⚠️';tc='ot';}
+          const b=document.createElement('div');b.className='abar '+cls;
+          b.innerHTML=`<span class="abar-icon">${icon}</span><div class="abar-txt ${tc}"><strong>${p.event}</strong> — ${(p.headline||'').replace(/ until .*/,'').substring(0,120)}. <a href="https://www.weather.gov/dvn/" target="_blank" style="color:var(--electric);font-size:11px;">NWS Details →</a></div>`;
+          z.appendChild(b);
+        });
+      }
+    }catch(e){console.error('nws',e);}
+    if(!hasNws){
+      const b=document.createElement('div');b.className='abar advisory';
+      b.innerHTML=`<span class="abar-icon">✅</span><div class="abar-txt" style="color:#b3ffcc;">No active NWS watches, warnings, or advisories for Clinton County, Iowa.</div>`;
+      z.appendChild(b);
+    }
+  }
+  if(getS('spc')){
+    const b=document.createElement('div');b.className='abar spc';
+    b.innerHTML=`<span class="abar-icon">🌪️</span><div class="abar-txt pt"><strong>SPC SEVERE WX OUTLOOK:</strong> Check the Storm Prediction Center for today's Clinton, IA risk level. <a href="https://www.spc.noaa.gov/products/outlook/day1otlk.html" target="_blank" style="color:#b39dff;">View SPC Day 1 →</a> &nbsp;<a href="https://www.spc.noaa.gov/climo/reports/today.html" target="_blank" style="color:#b39dff;">Storm Reports →</a></div>`;
+    z.appendChild(b);
+  }
+}
+
+// GOOGLE DOC BANNER
+async function fetchGDoc(){
+  try{
+    const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(GDOC);
+    const r=await fetch(proxy);
+    const j=await r.json();
+    const tmp=document.createElement('div');tmp.innerHTML=j.contents||'';
+    const paras=Array.from(tmp.querySelectorAll('p,h1,h2,h3,li'));
+    const lines=paras.map(p=>p.textContent.trim()).filter(t=>t&&t.length>3&&
+      !t.includes('Published using Google Docs')&&!t.includes('Report abuse')&&
+      !t.includes('Learn more')&&!t.includes('Updated automatically')&&
+      t!=='Weather Update:'
+    );
+    const unique=[...new Set(lines)];
+    const banner=document.getElementById('doc-banner');
+    const el=document.getElementById('doc-txt');
+    if(unique.length>0){
+      el.textContent=unique.join(' • ');banner.style.display='block';
+    } else {banner.style.display='none';}
+  }catch(e){document.getElementById('doc-banner').style.display='none';}
+}
+</script>
+<style>
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#0d2a1a,#0a1e12);border:1px solid var(--safe);border-radius:10px;padding:12px 22px;color:var(--safe);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;z-index:9999;opacity:0;transition:opacity .4s;white-space:nowrap;box-shadow:0 0 20px rgba(46,213,115,.2);}
+#toast.show{opacity:1;}
+</style>
+</body>
+</html>
